@@ -60,7 +60,8 @@ def run_all_checks(*, include_pytest: bool = False) -> tuple[bool, list[str]]:
     """
     python_exe = sys.executable
     steps: list[tuple[str, list[str]]] = [
-        ("Ruff Linter", [python_exe, "-m", "ruff", "check", "src", "tests", "scripts"]),
+        ("Ruff Linter", [python_exe, "-m", "ruff", "check", "."]),
+        ("Ruff Formatter", [python_exe, "-m", "ruff", "format", "--check", "."]),
         ("Mypy Strict", [python_exe, "-m", "mypy", "src", "tests", "scripts"]),
         (
             "Pylance / BasedPyright Strict",

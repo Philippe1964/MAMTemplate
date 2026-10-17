@@ -63,6 +63,7 @@ Whenever creating or modifying Domain models, Value Objects, Aggregates, Domain 
    @dataclass(frozen=True, slots=True, kw_only=True)
    class DomainEvent:
        """Base class for all immutable DDD Domain Events."""
+
        event_id: UUID = field(default_factory=uuid4)
        occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
    ```

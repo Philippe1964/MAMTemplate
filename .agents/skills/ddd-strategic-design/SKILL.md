@@ -72,11 +72,16 @@ When two Bounded Contexts or an external legacy/third-party API interact, explic
   ```python
   # Domain Layer (Port in Ubiquitous Language)
   class RightsVerificationPort(Protocol):
-      async def verify_broadcast_clearance(self, asset_id: AssetId, territory: TerritoryCode) -> ClearanceDecision: ...
+      async def verify_broadcast_clearance(
+          self, asset_id: AssetId, territory: TerritoryCode
+      ) -> ClearanceDecision: ...
+
 
   # Infrastructure Layer (ACL Adapter translating external API -> Domain Value Object)
   class ExternalDrmRightsAclAdapter(RightsVerificationPort):
-      async def verify_broadcast_clearance(self, asset_id: AssetId, territory: TerritoryCode) -> ClearanceDecision:
+      async def verify_broadcast_clearance(
+          self, asset_id: AssetId, territory: TerritoryCode
+      ) -> ClearanceDecision:
           raw_payload = await self._http_client.get(...)
           return self._translator.to_clearance_decision(raw_payload)
   ```

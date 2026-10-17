@@ -1,0 +1,57 @@
+name: CI & Docker 3-Tier Pipeline (MAMTemplate)
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+    branches: ["main", "master", "develop"]
+
+jobs:
+  quality-and-tests:
+    name: "Qualité & Tests (Python 3.14)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv and Python 3.14
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+
+      - name: Lint & Format check (Ruff)
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Static Type Check (Mypy strict)
+        run: uv run mypy .
+
+      - name: Unit, Acceptance & Integration Tests (Pytest)
+        run: uv run pytest -v --cov=mamtemplate
+
+  docker-three-tier-pipeline:
+    name: "Build & Verify 3-Tier Containers (presentation / business / data)"
+    needs: quality-and-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build all 3 tier images
+        run: docker compose build
+
+      - name: Start 3-tier stack (mamtemplate-presentation, mamtemplate-business, mamtemplate-data)
+        run: docker compose up -d --wait
+
+      - name: Verify running containers and health status
+        run: |
+          docker ps --filter "name=mamtemplate-"
+          curl --fail --silent --show-error http://localhost:8080/health
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose down -v

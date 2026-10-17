@@ -1,0 +1,31 @@
+# Environnement virtuel et caches Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Outils de test et d'analyse statique
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+tests/
+scripts/
+
+# Fichiers Git, IDE et secrets locaux
+.git/
+.gitignore
+.vscode/
+.agents/
+AGENTS.md
+.env
+*.db

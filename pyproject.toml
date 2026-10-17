@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mamtemplate"
+version = "0.1.0"
+description = "Modern Python 3.14 Project"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "asyncpg>=0.32.0",
+    "fastapi>=0.143.3",
+    "httpx>=0.28.1",
+    "psutil>=7.2.2",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.16.0",
+    "sqlalchemy[asyncio]>=2.1.5",
+    "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.40.2",
+    "httpx>=0.28.1",
+    "httpx2>=2.13.1",
+    "mypy>=1.11.0",
+    "pip>=26.2.1",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.6.0",
+    "types-psutil>=7.2.2.20260906",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "B",     # flake8-bugbear
+    "C4",    # flake8-comprehensions
+    "UP",    # pyupgrade
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit (security)
+    "PTH",   # flake8-use-pathlib
+    "RUF",   # Ruff-specific rules
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+mypy_path = ["src", "."]
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+include = ["src", "tests", "scripts"]
+extraPaths = ["src"]
+venvPath = "."
+venv = ".venv"
+reportDeprecated = "error"
+reportUnnecessaryIsInstance = "error"
+reportUnnecessaryComparison = "error"
+reportUnnecessaryCast = "error"
+reportUnknownVariableType = "error"
+reportAttributeAccessIssue = "error"
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src"]
+testpaths = ["tests"]
+addopts = "-ra -q --strict-markers"
+asyncio_mode = "auto"
+
+[tool.uv]
+link-mode = "copy"
+

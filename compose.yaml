@@ -1,0 +1,85 @@
+name: mamtemplate
+
+services:
+  # ============================================================================
+  # Tiers 1 : PRESENTATION (Nginx Reverse Proxy + React 19 SPA — Multi-Instance Ready)
+  # ============================================================================
+  presentation:
+    build:
+      context: .
+      dockerfile: docker/presentation/Dockerfile
+    image: mamtemplate-presentation:latest
+    restart: unless-stopped
+    ports:
+      - "${PRESENTATION_PORT:-8080}:80"
+    depends_on:
+      business:
+        condition: service_healthy
+    networks:
+      presentation_net:
+        aliases:
+          - mamtemplate-presentation
+
+  # ============================================================================
+  # Tiers 2 : BUSINESS (Python 3.14 / FastAPI — Scalable 1..N Replicas)
+  # ============================================================================
+  business:
+    build:
+      context: .
+      dockerfile: docker/business/Dockerfile
+    image: mamtemplate-business:latest
+    restart: unless-stopped
+    environment:
+      APP_NAME: "${APP_NAME:-MAMTemplate API}"
+      ENVIRONMENT: "${ENVIRONMENT:-production}"
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-mamtemplate}:${POSTGRES_PASSWORD:-mamtemplate_secret}@mamtemplate-data:5432/${POSTGRES_DB:-mamtemplate}"
+      PRESENTATION_METRICS_URL: "http://mamtemplate-presentation:80/internal/presentation-metrics.json"
+      BUSINESS_SERVICE_HOST: "mamtemplate-business"
+      BUSINESS_SERVICE_PORT: "8000"
+    expose:
+      - "8000"
+    depends_on:
+      data:
+        condition: service_healthy
+    networks:
+      presentation_net:
+        aliases:
+          - mamtemplate-business
+      data_net:
+        aliases:
+          - mamtemplate-business
+
+  # ============================================================================
+  # Tiers 3 : DATA (PostgreSQL 17 Alpine)
+  # ============================================================================
+  data:
+    build:
+      context: .
+      dockerfile: docker/data/Dockerfile
+    image: mamtemplate-data:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-mamtemplate}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-mamtemplate_secret}"
+      POSTGRES_DB: "${POSTGRES_DB:-mamtemplate}"
+    expose:
+      - "5432"
+    volumes:
+      - mamtemplate_pgdata:/var/lib/postgresql/data
+    networks:
+      data_net:
+        aliases:
+          - mamtemplate-data
+
+networks:
+  presentation_net:
+    name: mamtemplate-presentation-net
+    driver: bridge
+  data_net:
+    name: mamtemplate-data-net
+    driver: bridge
+    internal: true
+
+volumes:
+  mamtemplate_pgdata:
+    name: mamtemplate-pgdata

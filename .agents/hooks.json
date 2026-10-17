@@ -1,0 +1,13 @@
+{
+  "ide-and-static-quality-gate": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "uv --directory .. run python scripts/quality_gate_hook.py",
+        "timeout": 45
+      }
+    ]
+  }
+}
+
